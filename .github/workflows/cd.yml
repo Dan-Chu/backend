@@ -62,7 +62,18 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -euo pipefail
             cd /home/ubuntu/actions-runner/_work/backend/backend
+
+            echo "📄 .env 생성 중..."
+            umask 077
+            cat > .env <<'EOF_ENV'
+            ${{ secrets.ENV_FILE }}
+            EOF_ENV
+            
+            # 윈도우 개행 제거
+            sed -i 's/\r$//' .env || true
+            
             docker compose down
             docker compose pull
             docker compose up -d --build
